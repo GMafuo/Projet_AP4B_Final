@@ -107,15 +107,27 @@ public class MainWindow extends JFrame {
             BorderFactory.createEmptyBorder(30, 40, 30, 40)
         ));
         
-        JTextField nameField = createStyledTextField();
-        JComboBox<String> difficultyCombo = createStyledComboBox();
+        // Création des composants avec alignement
+        JLabel nameLabel = createStyledLabel("Nom du joueur");
+        nameLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
         
-        // Composants
-        formPanel.add(createStyledLabel("Nom du joueur"));
+        JTextField nameField = createStyledTextField();
+        nameField.setAlignmentX(Component.CENTER_ALIGNMENT);
+        nameField.setMaximumSize(new Dimension(300, 35)); // Limite la largeur du champ
+        
+        JLabel difficultyLabel = createStyledLabel("Difficulté");
+        difficultyLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
+        
+        JComboBox<String> difficultyCombo = createStyledComboBox();
+        difficultyCombo.setAlignmentX(Component.CENTER_ALIGNMENT);
+        difficultyCombo.setMaximumSize(new Dimension(300, 35)); // Limite la largeur du combo
+        
+        // Ajout des composants avec espacement
+        formPanel.add(nameLabel);
         formPanel.add(Box.createVerticalStrut(5));
         formPanel.add(nameField);
         formPanel.add(Box.createVerticalStrut(20));
-        formPanel.add(createStyledLabel("Difficulté"));
+        formPanel.add(difficultyLabel);
         formPanel.add(Box.createVerticalStrut(5));
         formPanel.add(difficultyCombo);
         formPanel.add(Box.createVerticalStrut(30));
