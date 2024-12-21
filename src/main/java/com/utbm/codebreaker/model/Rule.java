@@ -1,5 +1,9 @@
 package com.utbm.codebreaker.model;
 
+import java.util.Arrays;
+import java.util.Comparator;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.function.Predicate;
 
 public class Rule {
@@ -60,6 +64,73 @@ public class Rule {
                     if (g == Grade.F) return false;
                 }
                 return true;
+            }
+        );
+    }
+
+    // Ajout de nouvelles règles prédéfinies
+    public static Rule createMaxGradeRule(Grade maxGrade) {
+        return new Rule(
+            "Aucune note ne doit dépasser " + maxGrade.name(),
+            attempt -> {
+                for (Grade g : attempt) {
+                    if (g.getValue() > maxGrade.getValue()) return false;
+                }
+                return true;
+            }
+        );
+    }
+
+    public static Rule createMinGradeRule(Grade minGrade) {
+        return new Rule(
+            "Toutes les notes doivent être supérieures ou égales à " + minGrade.name(),
+            attempt -> {
+                for (Grade g : attempt) {
+                    if (g.getValue() < minGrade.getValue()) return false;
+                }
+                return true;
+            }
+        );
+    }
+
+    public static Rule createConsecutiveGradesRule() {
+        return new Rule(
+            "Les notes doivent être consécutives",
+            attempt -> {
+                Grade[] sorted = attempt.clone();
+                Arrays.sort(sorted, Comparator.comparing(Grade::getValue));
+                for (int i = 1; i < sorted.length; i++) {
+                    if (Math.abs(sorted[i].getValue() - sorted[i-1].getValue()) > 3) {
+                        return false;
+                    }
+                }
+                return true;
+            }
+        );
+    }
+
+    public static Rule createUniqueGradesRule() {
+        return new Rule(
+            "Toutes les notes doivent être différentes",
+            attempt -> {
+                Set<Grade> grades = new HashSet<>();
+                for (Grade g : attempt) {
+                    if (!grades.add(g)) return false;
+                }
+                return true;
+            }
+        );
+    }
+
+    public static Rule createSumRule(int targetSum) {
+        return new Rule(
+            "La somme des notes doit être égale à " + targetSum,
+            attempt -> {
+                int sum = 0;
+                for (Grade g : attempt) {
+                    sum += g.getValue();
+                }
+                return sum == targetSum;
             }
         );
     }

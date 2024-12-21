@@ -5,6 +5,7 @@ import com.utbm.codebreaker.model.Rule;
 import com.utbm.codebreaker.utils.Constants;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 public class Puzzle {
@@ -28,34 +29,57 @@ public class Puzzle {
     }
 
     private void generateRules() {
-        // Vider la liste des règles existantes
         rules.clear();
+        List<Rule> possibleRules = new ArrayList<>();
         
-        switch (difficulty) {
-            case Constants.DIFFICULTY_EASY: // TC01
-                rules.add(Rule.createAverageRule(12.0));
-                rules.add(Rule.createContainsGradeRule(Grade.B));
-                rules.add(Rule.createNoFailRule());
-                break;
-                
-            case Constants.DIFFICULTY_MEDIUM: // TC02
-                rules.add(Rule.createAverageRule(14.0));
-                rules.add(Rule.createContainsGradeRule(Grade.A));
-                rules.add(Rule.createNoFailRule());
-                break;
-                
-            case Constants.DIFFICULTY_HARD: // Branche
-                rules.add(Rule.createAverageRule(15.0));
-                rules.add(Rule.createContainsGradeRule(Grade.A));
-                rules.add(new Rule("Au moins deux notes supérieures à B", 
-                    attempt -> {
-                        int count = 0;
-                        for (Grade g : attempt) {
-                            if (g == Grade.A || g == Grade.B) count++;
-                        }
-                        return count >= 2;
-                    }));
-                break;
+        // Règles communes à toutes les difficultés
+        possibleRules.add(Rule.createNoFailRule());
+        possibleRules.add(Rule.createUniqueGradesRule());
+        possibleRules.add(Rule.createConsecutiveGradesRule());
+        possibleRules.add(Rule.createContainsGradeRule(Grade.A));
+        possibleRules.add(Rule.createContainsGradeRule(Grade.B));
+        possibleRules.add(Rule.createMinGradeRule(Grade.D));
+        possibleRules.add(Rule.createMaxGradeRule(Grade.A));
+        possibleRules.add(Rule.createSumRule(45));
+        possibleRules.add(Rule.createAverageRule(12.0));
+        
+        // Nombre de règles selon la difficulté
+        int numberOfRules = switch (difficulty) {
+            case Constants.DIFFICULTY_EASY -> 3;    // TC01
+            case Constants.DIFFICULTY_MEDIUM -> 4;   // TC02
+            case Constants.DIFFICULTY_HARD -> 5;     // Branche
+            default -> 3;
+        };
+        
+        // Sélection aléatoire des règles avec contraintes selon la difficulté
+        Collections.shuffle(possibleRules);
+        
+        // Ajout d'une règle de moyenne adaptée à la difficulté
+        rules.add(switch (difficulty) {
+            case Constants.DIFFICULTY_EASY -> Rule.createAverageRule(12.0);
+            case Constants.DIFFICULTY_MEDIUM -> Rule.createAverageRule(14.0);
+            case Constants.DIFFICULTY_HARD -> Rule.createAverageRule(15.0);
+            default -> Rule.createAverageRule(12.0);
+        });
+        
+        // Ajout des règles aléatoires supplémentaires
+        int rulesAdded = 1;
+        for (Rule rule : possibleRules) {
+            if (rulesAdded >= numberOfRules) break;
+            
+            // Évite d'ajouter des règles trop similaires
+            boolean isCompatible = true;
+            for (Rule existingRule : rules) {
+                if (rule.getDescription().equals(existingRule.getDescription())) {
+                    isCompatible = false;
+                    break;
+                }
+            }
+            
+            if (isCompatible) {
+                rules.add(rule);
+                rulesAdded++;
+            }
         }
     }
 
