@@ -17,8 +17,8 @@ public class Puzzle {
     public Puzzle(int difficulty) {
         this.difficulty = difficulty;
         this.rules = new ArrayList<>();
-        this.verificationSystem = new VerificationSystem();
         this.solution = new Grade[3]; // 3 notes à deviner
+        this.verificationSystem = new VerificationSystem(this);
     }
 
     public void generatePuzzle() {
