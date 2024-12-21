@@ -14,8 +14,7 @@ public class MainWindow extends JFrame {
         // Configuration de base de la fenêtre
         setTitle("UTBM Code Breaker");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setSize(800, 600);
-        setLocationRelativeTo(null);
+        setExtendedState(JFrame.MAXIMIZED_BOTH);
         
         // Initialisation du CardLayout pour gérer les écrans
         cardLayout = new CardLayout();
