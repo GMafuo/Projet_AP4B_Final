@@ -249,7 +249,6 @@ public class GameScreen extends JPanel {
         boolean result = game.makeAttempt(attempt);
         String feedback = game.getCurrentPuzzle().getFeedback(attempt);
         
-        // Mise à jour du plateau de jeu
         gameBoard.addAttempt(attempt, result, feedback);
         feedbackArea.setText(feedback);
         
@@ -259,7 +258,7 @@ public class GameScreen extends JPanel {
                            calculateTimeBonus(timeSpent, difficulty);
             game.getCurrentPlayer().addScore(finalScore);
             
-            // Ajout du score à la liste des meilleurs scores
+            // Ajout du score aux meilleurs scores
             highScores.add(new HighScore(
                 game.getCurrentPlayer().getName(),
                 finalScore,
@@ -267,27 +266,40 @@ public class GameScreen extends JPanel {
                 timeSpent
             ));
             
-            // Tri des meilleurs scores
             Collections.sort(highScores);
-            
-            // Garde uniquement les 10 meilleurs scores
             if (highScores.size() > 10) {
                 highScores = highScores.subList(0, 10);
             }
             
-            JOptionPane.showMessageDialog(this, 
-                "Félicitations ! Vous avez trouvé la solution !\nScore : " + finalScore,
-                "Victoire !",
-                JOptionPane.INFORMATION_MESSAGE);
+            showGameEndDialog("Félicitations ! Vous avez trouvé la solution !\nScore : " + finalScore);
         } else if (game.isGameOver()) {
-            JOptionPane.showMessageDialog(this,
-                "Game Over ! Vous n'avez plus de tentatives.",
-                "Perdu !",
-                JOptionPane.ERROR_MESSAGE);
+            showGameEndDialog("Game Over ! Vous n'avez plus de tentatives.");
         }
         
-        // Mise à jour du compteur de tentatives
         attemptsLabel.setText("Tentatives restantes : " + game.getRemainingAttempts());
+    }
+    
+    private void showGameEndDialog(String message) {
+        Object[] options = {"Nouvelle partie", "Quitter"};
+        int choice = JOptionPane.showOptionDialog(
+            this,
+            message,
+            "Fin de partie",
+            JOptionPane.YES_NO_OPTION,
+            JOptionPane.INFORMATION_MESSAGE,
+            null,
+            options,
+            options[0]
+        );
+        
+        if (choice == JOptionPane.YES_OPTION) {
+            restartGame();
+        } else {
+            Window window = SwingUtilities.getWindowAncestor(this);
+            if (window != null) {
+                window.dispose();
+            }
+        }
     }
     
     private void restartGame() {
