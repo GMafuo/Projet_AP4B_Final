@@ -158,10 +158,34 @@ public class GameScreen extends JPanel {
         selectorsPanel.setBackground(Color.WHITE);
         gradeSelectors = new JComboBox[3];
         
+        // Label pour la moyenne
+        JLabel averageLabel = createStyledLabel("Moyenne : --");
+        
+        // Création des sélecteurs avec leurs listeners
         for (int i = 0; i < 3; i++) {
             gradeSelectors[i] = createStyledComboBox(Grade.values());
             selectorsPanel.add(createStyledLabel("Note " + (i + 1)));
             selectorsPanel.add(gradeSelectors[i]);
+            
+            // Ajout du listener pour mettre à jour la moyenne
+            gradeSelectors[i].addItemListener(e -> {
+                double sum = 0;
+                boolean allSelected = true;
+                
+                for (JComboBox<Grade> selector : gradeSelectors) {
+                    Grade selected = (Grade) selector.getSelectedItem();
+                    if (selected == null) {
+                        allSelected = false;
+                        break;
+                    }
+                    sum += selected.getValue();
+                }
+                
+                if (allSelected) {
+                    double average = sum / 3.0;
+                    averageLabel.setText(String.format("Moyenne : %.1f", average));
+                }
+            });
         }
 
         // Boutons d'action
@@ -181,10 +205,12 @@ public class GameScreen extends JPanel {
         buttonsPanel.add(newGameButton);
         buttonsPanel.add(historyButton);
 
-        // Composants
+        // Ajout des composants
         controlPanel.add(attemptsLabel);
         controlPanel.add(Box.createVerticalStrut(20));
         controlPanel.add(selectorsPanel);
+        controlPanel.add(Box.createVerticalStrut(10));
+        controlPanel.add(averageLabel);  
         controlPanel.add(Box.createVerticalStrut(20));
         controlPanel.add(buttonsPanel);
         
