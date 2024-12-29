@@ -41,7 +41,6 @@ public class Puzzle {
         possibleRules.add(Rule.createMinGradeRule(Grade.D));
         possibleRules.add(Rule.createMaxGradeRule(Grade.A));
         possibleRules.add(Rule.createSumRule(45));
-        possibleRules.add(Rule.createAverageRule(12.0));
         
         // Nombre de règles selon la difficulté
         int numberOfRules = switch (difficulty) {
@@ -51,23 +50,25 @@ public class Puzzle {
             default -> 3;
         };
         
-        // Sélection aléatoire des règles avec contraintes selon la difficulté
+        // Génération d'une moyenne aléatoire selon la difficulté
+        double minAverage = switch (difficulty) {
+            case Constants.DIFFICULTY_EASY -> 11.0 + Math.random() * 3.0;    // Entre 11 et 14
+            case Constants.DIFFICULTY_MEDIUM -> 13.0 + Math.random() * 3.0;  // Entre 13 et 16
+            case Constants.DIFFICULTY_HARD -> 14.0 + Math.random() * 3.0;    // Entre 14 et 17
+            default -> 11.0 + Math.random() * 3.0;
+        };
+        
+        // Arrondir à 0.5 près pour plus de lisibilité
+        minAverage = Math.round(minAverage * 2) / 2.0;
+        
+        rules.add(Rule.createAverageRule(minAverage));
+        
         Collections.shuffle(possibleRules);
-        
-        // Ajout d'une règle de moyenne adaptée à la difficulté
-        rules.add(switch (difficulty) {
-            case Constants.DIFFICULTY_EASY -> Rule.createAverageRule(12.0);
-            case Constants.DIFFICULTY_MEDIUM -> Rule.createAverageRule(14.0);
-            case Constants.DIFFICULTY_HARD -> Rule.createAverageRule(15.0);
-            default -> Rule.createAverageRule(12.0);
-        });
-        
-        // Ajout des règles aléatoires supplémentaires
         int rulesAdded = 1;
+        
         for (Rule rule : possibleRules) {
             if (rulesAdded >= numberOfRules) break;
             
-            // Évite d'ajouter des règles trop similaires
             boolean isCompatible = true;
             for (Rule existingRule : rules) {
                 if (rule.getDescription().equals(existingRule.getDescription())) {
