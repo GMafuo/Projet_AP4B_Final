@@ -33,7 +33,7 @@ public class Rule {
     // Exemples de règles prédéfinies
     public static Rule createAverageRule(double minAverage) {
         return new Rule(
-            "La moyenne doit être supérieure à " + minAverage,
+            String.format("La moyenne doit être supérieure à %.1f", minAverage),
             attempt -> {
                 double sum = 0;
                 for (Grade grade : attempt) {
@@ -124,7 +124,7 @@ public class Rule {
 
     public static Rule createSumRule(int targetSum) {
         return new Rule(
-            "La somme des notes doit être égale à " + targetSum,
+            String.format("La somme des notes doit être égale à %d", targetSum),
             attempt -> {
                 int sum = 0;
                 for (Grade g : attempt) {

@@ -29,11 +29,23 @@ public class VerificationSystem {
         StringBuilder feedback = new StringBuilder();
         feedback.append("Analyse de votre tentative :\n\n");
 
-        // Vérification des règles
+        // Vérification des règles avec exemples
         boolean allRulesValid = true;
         for (Rule rule : rules) {
             if (!rule.verify(attempt)) {
                 feedback.append("❌ ").append(rule.getDescription()).append("\n");
+                
+                // Ajout d'information pour la règle de moyenne
+                if (rule.getDescription().contains("moyenne")) {
+                    double sum = 0;
+                    for (Grade g : attempt) {
+                        sum += g.getValue();
+                    }
+                    double average = sum / attempt.length;
+                    feedback.append(String.format("   📊 Moyenne actuelle : %.1f\n", average));
+                }
+                
+                feedback.append("   💡 Exemple valide : ").append(generateExampleForRule(rule)).append("\n");
                 allRulesValid = false;
             }
         }
@@ -42,16 +54,17 @@ public class VerificationSystem {
             feedback.append("✅ Toutes les règles sont respectées !\n");
         }
         
+        // Analyse détaillée des positions
         feedback.append("\nIndices pour chaque position :\n");
-        
-        // Comparaison avec la solution
-        Grade[] solution = puzzle.getSolution(); // Il faudra ajouter une référence au Puzzle
+        Grade[] solution = puzzle.getSolution();
+        int correctPositions = 0;
         
         for (int i = 0; i < attempt.length; i++) {
             feedback.append("Position ").append(i + 1).append(" (").append(attempt[i]).append(") : ");
             
             if (attempt[i] == solution[i]) {
                 feedback.append("✅ Correct !\n");
+                correctPositions++;
             } else {
                 int diff = solution[i].getValue() - attempt[i].getValue();
                 if (diff > 0) {
@@ -68,8 +81,32 @@ public class VerificationSystem {
                 feedback.append("\n");
             }
         }
-        
+
+        // Conseils stratégiques
+        feedback.append("\n💡 Conseil : ");
+        if (!allRulesValid) {
+            feedback.append("Concentrez-vous d'abord sur le respect des règles !");
+        } else if (correctPositions == 0) {
+            feedback.append("Essayez de changer complètement votre approche !");
+        } else if (correctPositions == 1) {
+            feedback.append("Bonne direction ! Gardez cette note et ajustez les autres.");
+        } else if (correctPositions == 2) {
+            feedback.append("Vous y êtes presque ! Une seule note à modifier.");
+        }
+
         return feedback.toString();
+    }
+
+    private String generateExampleForRule(Rule rule) {
+        // Génère un exemple simple qui respecte la règle spécifique
+        if (rule.getDescription().contains("moyenne")) {
+            return "A B B";
+        } else if (rule.getDescription().contains("consécutives")) {
+            return "A B C";
+        } else if (rule.getDescription().contains("différentes")) {
+            return "A B C";
+        }
+        return "A B C"; 
     }
 
     public boolean isValidAttempt(Grade[] attempt) {
