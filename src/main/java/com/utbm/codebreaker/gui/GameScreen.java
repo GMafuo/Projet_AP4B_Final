@@ -164,29 +164,16 @@ public class GameScreen extends JPanel {
         // Création des sélecteurs avec leurs listeners
         for (int i = 0; i < 3; i++) {
             gradeSelectors[i] = createStyledComboBox(Grade.values());
+            gradeSelectors[i].setSelectedItem(Grade.A); 
             selectorsPanel.add(createStyledLabel("Note " + (i + 1)));
             selectorsPanel.add(gradeSelectors[i]);
             
-            // Ajout du listener pour mettre à jour la moyenne
             gradeSelectors[i].addItemListener(e -> {
-                double sum = 0;
-                boolean allSelected = true;
-                
-                for (JComboBox<Grade> selector : gradeSelectors) {
-                    Grade selected = (Grade) selector.getSelectedItem();
-                    if (selected == null) {
-                        allSelected = false;
-                        break;
-                    }
-                    sum += selected.getValue();
-                }
-                
-                if (allSelected) {
-                    double average = sum / 3.0;
-                    averageLabel.setText(String.format("Moyenne : %.1f", average));
-                }
+                updateAverageLabel(averageLabel);
             });
         }
+
+        updateAverageLabel(averageLabel);
 
         // Boutons d'action
         JPanel buttonsPanel = new JPanel();
@@ -492,6 +479,26 @@ public class GameScreen extends JPanel {
         @Override
         public boolean isBorderOpaque() {
             return false;
+        }
+    }
+
+    // Méthode séparée pour le calcul de la moyenne
+    private void updateAverageLabel(JLabel averageLabel) {
+        double sum = 0;
+        boolean allSelected = true;
+        
+        for (JComboBox<Grade> selector : gradeSelectors) {
+            Grade selected = (Grade) selector.getSelectedItem();
+            if (selected == null) {
+                allSelected = false;
+                break;
+            }
+            sum += selected.getValue();
+        }
+        
+        if (allSelected) {
+            double average = sum / 3.0;
+            averageLabel.setText(String.format("Moyenne : %.1f", average));
         }
     }
 } 
