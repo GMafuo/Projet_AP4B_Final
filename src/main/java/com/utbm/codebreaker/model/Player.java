@@ -32,12 +32,5 @@ public class Player {
     public void addScore(int points) {
         this.score += points;
     }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
+    
 }

@@ -60,8 +60,8 @@ public class Puzzle {
         // Génération d'une moyenne aléatoire selon la difficulté avec des plages ajustées
         double minAverage = switch (difficulty) {
             case Constants.DIFFICULTY_EASY -> 11.0 + Math.random() * 3.0;    // Entre 11 et 14
-            case Constants.DIFFICULTY_MEDIUM -> 12.0 + Math.random() * 3.0;  // Entre 12 et 15 (ajusté)
-            case Constants.DIFFICULTY_HARD -> 13.0 + Math.random() * 3.0;    // Entre 13 et 16 (ajusté)
+            case Constants.DIFFICULTY_MEDIUM -> 12.0 + Math.random() * 3.0;  // Entre 12 et 15
+            case Constants.DIFFICULTY_HARD -> 13.0 + Math.random() * 3.0;    // Entre 13 et 16
             default -> 11.0 + Math.random() * 3.0;
         };
         
