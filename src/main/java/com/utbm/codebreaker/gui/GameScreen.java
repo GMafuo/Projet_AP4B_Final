@@ -254,65 +254,114 @@ public class GameScreen extends JPanel {
     }
     
     private void makeAttempt() {
-        Grade[] attempt = new Grade[3];
-        for (int i = 0; i < 3; i++) {
-            attempt[i] = (Grade) gradeSelectors[i].getSelectedItem();
-        }
-        
-        boolean result = game.makeAttempt(attempt);
-        String feedback = game.getCurrentPuzzle().getFeedback(attempt);
-        
-        gameBoard.addAttempt(attempt, result, feedback);
-        feedbackArea.setText(feedback);
-        
-        if (result) {
-            gameTimer.stop();
-            int finalScore = game.getCurrentPlayer().getScore() + 
-                           calculateTimeBonus(timeSpent, difficulty);
-            game.getCurrentPlayer().addScore(finalScore);
-            
-            // Ajout du score aux meilleurs scores
-            highScores.add(new HighScore(
-                game.getCurrentPlayer().getName(),
-                finalScore,
-                difficulty,
-                timeSpent
-            ));
-            
-            Collections.sort(highScores);
-            if (highScores.size() > 10) {
-                highScores = highScores.subList(0, 10);
+        try {
+            Grade[] attempt = new Grade[3];
+            for (int i = 0; i < 3; i++) {
+                attempt[i] = (Grade) gradeSelectors[i].getSelectedItem();
             }
             
-            showGameEndDialog("Félicitations ! Vous avez trouvé la solution !\nScore : " + finalScore);
-        } else if (game.isGameOver()) {
-            showGameEndDialog("Game Over ! Vous n'avez plus de tentatives.");
+            boolean result = game.makeAttempt(attempt);
+            String feedback = game.getCurrentPuzzle().getFeedback(attempt);
+            
+            gameBoard.addAttempt(attempt, result, feedback);
+            feedbackArea.setText(feedback);
+            
+            if (result) {
+                handleWin();
+            }
+            
+            attemptsLabel.setText("Tentatives restantes : " + game.getRemainingAttempts());
+            
+        } catch (IllegalArgumentException e) {
+            JOptionPane.showMessageDialog(this,
+                "Tentative invalide : " + e.getMessage(),
+                "Erreur",
+                JOptionPane.ERROR_MESSAGE);
+        } catch (IllegalStateException e) {
+            JOptionPane.showMessageDialog(this,
+                e.getMessage(),
+                "Game Over ! :(",
+                JOptionPane.INFORMATION_MESSAGE);
+            showGameEndDialog("La partie est terminée !");
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(this,
+                "Erreur inattendue : " + e.getMessage(),
+                "Erreur",
+                JOptionPane.ERROR_MESSAGE);
         }
-        
-        attemptsLabel.setText("Tentatives restantes : " + game.getRemainingAttempts());
     }
     
     private void showGameEndDialog(String message) {
-        Object[] options = {"Nouvelle partie", "Quitter"};
-        int choice = JOptionPane.showOptionDialog(
-            this,
-            message,
-            "Fin de partie",
-            JOptionPane.YES_NO_OPTION,
-            JOptionPane.INFORMATION_MESSAGE,
-            null,
-            options,
-            options[0]
-        );
+        JDialog dialog = new JDialog((Frame)SwingUtilities.getWindowAncestor(this), 
+            "Fin de partie", true);
+        dialog.setLayout(new BorderLayout(10, 10));
         
-        if (choice == JOptionPane.YES_OPTION) {
+        // Panel pour le message
+        JLabel messageLabel = new JLabel(message);
+        messageLabel.setHorizontalAlignment(JLabel.CENTER);
+        messageLabel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
+        dialog.add(messageLabel, BorderLayout.NORTH);
+        
+        // Panel pour les boutons
+        JPanel buttonPanel = new JPanel(new GridBagLayout());
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.insets = new Insets(5, 5, 5, 5);
+        
+        JButton newGameButton = createStyledButton("Nouvelle partie", new Color(46, 125, 50));
+        JButton difficultyButton = createStyledButton("Changer la difficulté", new Color(25, 118, 210));
+        JButton quitButton = createStyledButton("Quitter", new Color(211, 47, 47));
+        
+        // Placement des boutons
+        gbc.gridx = 0;
+        gbc.gridy = 0;
+        gbc.gridwidth = 1;
+        buttonPanel.add(newGameButton, gbc);
+        
+        gbc.gridx = 1;
+        buttonPanel.add(difficultyButton, gbc);
+        
+        gbc.gridx = 0;
+        gbc.gridy = 1;
+        gbc.gridwidth = 2;
+        gbc.insets = new Insets(5, 5, 15, 5); 
+        buttonPanel.add(quitButton, gbc);
+        
+        JPanel bottomPadding = new JPanel();
+        bottomPadding.setPreferredSize(new Dimension(1, 10));
+        dialog.add(bottomPadding, BorderLayout.SOUTH);
+        
+        dialog.add(buttonPanel, BorderLayout.CENTER);
+
+        newGameButton.addActionListener(e -> {
+            dialog.dispose();
             restartGame();
-        } else {
+        });
+        
+        difficultyButton.addActionListener(e -> {
+            dialog.dispose();
+            Window window = SwingUtilities.getWindowAncestor(this);
+            if (window != null) {
+                window.dispose();
+                SwingUtilities.invokeLater(() -> {
+                    MainWindow mainWindow = new MainWindow();
+                    mainWindow.skipToGameSetup(playerName);
+                    mainWindow.setVisible(true);
+                });
+            }
+        });
+        
+        quitButton.addActionListener(e -> {
+            dialog.dispose();
             Window window = SwingUtilities.getWindowAncestor(this);
             if (window != null) {
                 window.dispose();
             }
-        }
+        });
+        
+        dialog.setSize(400, 200);
+        dialog.setLocationRelativeTo(this);
+        dialog.setDefaultCloseOperation(JDialog.DO_NOTHING_ON_CLOSE);
+        dialog.setVisible(true);
     }
     
     private void restartGame() {
@@ -500,5 +549,43 @@ public class GameScreen extends JPanel {
             double average = sum / 3.0;
             averageLabel.setText(String.format("Moyenne : %.1f", average));
         }
+    }
+
+    private void handleWin() {
+        gameTimer.stop();
+        int timeBonus = calculateTimeBonus(timeSpent, difficulty);
+        int finalScore = game.getCurrentPlayer().getScore() + timeBonus;
+        
+        // Ajouter le score aux meilleurs scores
+        highScores.add(new HighScore(playerName, finalScore, difficulty, timeSpent));
+        Collections.sort(highScores);
+        
+        // Limiter la liste à 10 meilleurs scores
+        if (highScores.size() > 10) {
+            highScores = highScores.subList(0, 10);
+        }
+        
+        // Afficher le message de victoire
+        String message = String.format(
+            "Félicitations ! Vous avez gagné !\n" +
+            "Score : %d\n" +
+            "Bonus temps : %d\n" +
+            "Score final : %d\n" +
+            "Temps : %d:%02d",
+            game.getCurrentPlayer().getScore(),
+            timeBonus,
+            finalScore,
+            timeSpent / 60,
+            timeSpent % 60
+        );
+        
+        JOptionPane.showMessageDialog(
+            this,
+            message,
+            "Victoire !",
+            JOptionPane.INFORMATION_MESSAGE
+        );
+        
+        showGameEndDialog("Voulez-vous commencer une nouvelle partie ?");
     }
 } 

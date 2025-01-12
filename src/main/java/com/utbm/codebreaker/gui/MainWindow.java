@@ -9,6 +9,7 @@ public class MainWindow extends JFrame {
     private CardLayout cardLayout;
     private JPanel welcomePanel;
     private JPanel configPanel;
+    private JTextField playerNameField;
     
     public MainWindow() {
         // Configuration de base de la fenêtre
@@ -111,21 +112,21 @@ public class MainWindow extends JFrame {
         JLabel nameLabel = createStyledLabel("Nom du joueur");
         nameLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
         
-        JTextField nameField = createStyledTextField();
-        nameField.setAlignmentX(Component.CENTER_ALIGNMENT);
-        nameField.setMaximumSize(new Dimension(300, 35)); // Limite la largeur du champ
+        playerNameField = createStyledTextField();
+        playerNameField.setAlignmentX(Component.CENTER_ALIGNMENT);
+        playerNameField.setMaximumSize(new Dimension(300, 35));
         
         JLabel difficultyLabel = createStyledLabel("Difficulté");
         difficultyLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
         
         JComboBox<String> difficultyCombo = createStyledComboBox();
         difficultyCombo.setAlignmentX(Component.CENTER_ALIGNMENT);
-        difficultyCombo.setMaximumSize(new Dimension(300, 35)); // Limite la largeur du combo
+        difficultyCombo.setMaximumSize(new Dimension(300, 35)); 
         
         // Ajout des composants avec espacement
         formPanel.add(nameLabel);
         formPanel.add(Box.createVerticalStrut(5));
-        formPanel.add(nameField);
+        formPanel.add(playerNameField);
         formPanel.add(Box.createVerticalStrut(20));
         formPanel.add(difficultyLabel);
         formPanel.add(Box.createVerticalStrut(5));
@@ -135,7 +136,7 @@ public class MainWindow extends JFrame {
         // Création des boutons avec leurs actions
         JButton startButton = createStyledButton("Commencer");
         startButton.addActionListener(e -> {
-            String playerName = nameField.getText();
+            String playerName = playerNameField.getText();
             int difficulty = difficultyCombo.getSelectedIndex() + 1; // +1 car l'index commence à 0
             startGame(playerName, difficulty);
         });
@@ -191,5 +192,11 @@ public class MainWindow extends JFrame {
         GameScreen gameScreen = new GameScreen(playerName, difficulty);
         mainPanel.add(gameScreen, "GAME");
         cardLayout.show(mainPanel, "GAME");
+    }
+    
+    public void skipToGameSetup(String playerName) {
+        cardLayout.show(mainPanel, "CONFIG");
+        playerNameField.setText(playerName);
+        playerNameField.setEnabled(false);
     }
 }

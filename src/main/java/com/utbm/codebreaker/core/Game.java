@@ -30,6 +30,10 @@ public class Game {
     }
 
     public void startGame(String playerName) {
+        if (playerName == null || playerName.trim().isEmpty()) {
+            throw new IllegalArgumentException("Le nom du joueur ne peut pas être vide");
+        }
+
         currentPlayer = new Player(playerName);
         currentPuzzle = new Puzzle(difficulty);
         currentPuzzle.generatePuzzle();
@@ -49,8 +53,22 @@ public class Game {
     }
 
     public boolean makeAttempt(Grade[] attempt) {
-        if (isGameOver || currentAttempt >= maxAttempts) {
-            return false;
+        if (attempt == null || attempt.length != 3) {
+            throw new IllegalArgumentException("La tentative doit contenir exactement 3 notes");
+        }
+
+        if (isGameOver) {
+            throw new IllegalStateException("Game over ! :(");
+        }
+
+        if (currentAttempt >= maxAttempts) {
+            throw new IllegalStateException("Nombre maximum de tentatives atteint");
+        }
+
+        for (Grade grade : attempt) {
+            if (grade == null) {
+                throw new IllegalArgumentException("Les notes ne peuvent pas être nulles");
+            }
         }
 
         boolean result = currentPuzzle.isSolution(attempt);
