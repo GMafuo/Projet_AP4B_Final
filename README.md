@@ -35,14 +35,7 @@ CodeBreaker UTBM est un jeu inspiré de la machine Enigma, adapté au contexte d
 
 ## Installation
 1. Cloner le dépôt
-2. Compiler avec Maven :
-   ```bash
-   mvn clean install
-   ```
-3. Lancer le jeu :
-   ```bash
-   java -jar target/utbm-codebreaker-1.0-SNAPSHOT.jar
-   ```
+2. Lancer simplement le fichier Main.java avec Intellij IDEA
 
 ## Développé dans le cadre du cours AP4B
 Ce projet a été réalisé dans le cadre du cours AP4B à l'UTBM.
